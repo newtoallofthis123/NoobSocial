@@ -35,3 +35,25 @@ func (api *ApiServer) handleGetPost(c *gin.Context) {
 
 	c.JSON(200, post)
 }
+
+func (api *ApiServer) handleGetAuthorPosts(c *gin.Context){
+    author := c.Param("author")
+
+    posts, err := api.store.GetAuthorPosts(author)
+    if err != nil {
+        api.ErrorReturn(c, 404, "Author not found")
+        return
+    }
+
+    c.JSON(200, posts)
+}
+
+func (api *ApiServer) handleGetAllPosts(c *gin.Context){
+    posts, err := api.store.debugGetAllPosts()
+    if err != nil {
+        api.ErrorReturn(c, 404, "No posts found")
+        return
+    }
+
+    c.JSON(200, posts)
+}

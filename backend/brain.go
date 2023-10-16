@@ -11,6 +11,8 @@ type Store interface {
 	ValidSession(sessionId string) bool
 	CreatePost(username string, req CreatePostRequest) (string, error)
 	GetPost(postId string) (Post, error)
+    GetAuthorPosts(username string) ([]Post, error)
+    debugGetAllPosts() ([]Post, error)
 }
 
 func (pq *DbInstance) CreateUser(req CreateUserRequest) error {
@@ -137,4 +139,50 @@ func (pq *DbInstance) GetPost(postId string) (Post, error) {
 		return Post{}, err
 	}
 	return post, nil
+}
+
+func (pq *DbInstance) GetAuthorPosts(username string)([]Post, error){
+    query := `
+    SELECT post_id, username, content, created_at FROM posts
+    WHERE username = $1
+    `
+
+    rows,err := pq.db.Query(query, username)
+    if err != nil{
+        return nil, err
+    }
+    var posts []Post
+    for rows.Next(){
+        var post Post
+        err := rows.Scan(&post.PostId, &post.Username, &post.Content, &post.CreatedAt)
+        if err != nil {
+            return nil, err
+        }
+        posts = append(posts, post)
+    }
+
+    return posts, nil
+}
+
+func (pq *DbInstance) debugGetAllPosts() ([]Post, error){
+    query := `
+    SELECT post_id, username, content, created_at FROM posts
+    `
+
+    rows,err := pq.db.Query(query)
+    if err != nil{
+        return nil, err
+    }
+    var posts []Post
+
+    for rows.Next(){
+        var post Post
+        err := rows.Scan(&post.PostId, &post.Username, &post.Content, &post.CreatedAt)
+        if err != nil {
+            return nil, err
+        }
+        posts = append(posts, post)
+    }
+
+    return posts, nil
 }

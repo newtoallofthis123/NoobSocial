@@ -1,6 +1,8 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+)
 
 type ApiServer struct {
 	client string
@@ -20,6 +22,17 @@ func (api *ApiServer) ErrorReturn(c *gin.Context, code int, message string) {
 		"message": message,
 	})
 	c.Abort()
+}
+
+func (api *ApiServer) debugMiddleWare() gin.HandlerFunc {
+    return func(c *gin.Context) {
+        debug_key := c.GetHeader("debug")
+        env := GetEnv()
+        if debug_key != env.SessionKey {
+            api.ErrorReturn(c, 401, "Unauthorized")
+        }
+        c.Next()
+    }
 }
 
 func (api *ApiServer) Start() {
@@ -42,6 +55,10 @@ func (api *ApiServer) Start() {
 
 	// Post routes
 	r.GET("/post/:postId", api.handleGetPost)
+    r.GET("/posts/:author", api.handleGetAuthorPosts)
+
+    debug := r.Group("/debug", api.debugMiddleWare())
+    debug.GET("/posts", api.handleGetAllPosts)
 
 	err := r.Run(api.client)
 	if err != nil {

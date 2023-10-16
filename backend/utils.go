@@ -24,7 +24,7 @@ func GetEnv() Env {
 		Host:       os.Getenv("HOST"),
 		Port:       os.Getenv("PORT"),
 		Client:     os.Getenv("CLIENT"),
-		SessionKey: os.Getenv("SESSION_KEY"),
+		SessionKey: os.Getenv("SESSION_SECRET"),
 	}
 }
 
